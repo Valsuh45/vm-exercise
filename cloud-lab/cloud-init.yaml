@@ -1,0 +1,41 @@
+#cloud-config
+
+# Set hostname
+hostname: cloudinit-demo
+manage_etc_hosts: true
+
+# Create a user
+users:
+  - name: ciuser
+    gecos: "Cloud Init User"
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    groups: users, admin
+    shell: /bin/bash
+
+# Update and install packages 
+package_update: true
+package_upgrade: true
+packages:
+  - nginx
+  - git
+  - htop
+  - curl
+  - wget
+  - net-tools
+
+# Run commands at final boot stage
+runcmd:
+  - [ systemctl, enable, nginx ]
+  - [ systemctl, start, nginx ]
+  - [ sh, -c, "echo 'Cloud-init completed: $(date)' > /home/ciuser/cloudinit-done.txt" ]
+
+# Write files
+write_files:
+  - path: /etc/motd.tail
+    content: |
+      Cloud-init demo VM
+      User: ciuser
+      Services: nginx running
+      Packages: nginx, git, htop
+
+final_message: "The system is finally up, after $UPTIME seconds"
